@@ -48,9 +48,29 @@ jobs:
           $prUrl = "${{ github.event.pull_request.html_url }}"
           if ($prUrl) {
             Write-Host "Running PR-Agent on: $prUrl"
+            Write-Host ""
+            
+            Write-Host "=== Running: Review ==="
             python -m pr_agent.cli --pr_url "$prUrl" review
+            
+            Write-Host ""
+            Write-Host "=== Running: Describe ==="
             python -m pr_agent.cli --pr_url "$prUrl" describe
+            
+            Write-Host ""
+            Write-Host "=== Running: Improve ==="
             python -m pr_agent.cli --pr_url "$prUrl" improve
+            
+            Write-Host ""
+            Write-Host "=== Running: Add Docs ==="
+            python -m pr_agent.cli --pr_url "$prUrl" add_docs
+            
+            Write-Host ""
+            Write-Host "=== Running: Generate Labels ==="
+            python -m pr_agent.cli --pr_url "$prUrl" generate_labels
+            
+            Write-Host ""
+            Write-Host "=== PR-Agent Complete ==="
           } else {
             Write-Host "No PR URL found, skipping..."
           }
