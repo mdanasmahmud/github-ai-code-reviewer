@@ -92,3 +92,45 @@ MIT License - Feel free to modify and share!
 ---
 
 Made with ❤️ for developers who want free, local AI code reviews.
+
+---
+
+# 🌐 GROQ CLOUD VERSION (No GPU Required!)
+
+If you don't have a GPU or want to run on a VPS/server, use the Groq-powered version.
+
+## Quick Start (Groq)
+
+1. **Get a FREE Groq API key** from: https://console.groq.com/keys
+2. **Run `install-groq.bat`** (instead of install.bat)
+3. Follow the prompts
+4. Add `GROQ_API_KEY` as a GitHub Secret
+5. Copy `workflow-groq/pr_agent.yml` to your repo
+
+## Requirements (Groq Version)
+
+- ✅ Any Windows machine (no GPU needed!)
+- ✅ Works on cheap VPS ($5/month)
+- ✅ FREE Groq API (14,400 requests/day)
+- ✅ Python 3.8+
+
+## Groq vs Ollama Comparison
+
+| Feature | Ollama (Local) | Groq (Cloud) |
+|---------|---------------|--------------|
+| **GPU Required** | ✅ Yes (6GB+ VRAM) | ❌ No |
+| **Works on VPS** | ❌ No | ✅ Yes |
+| **Cost** | Free (electricity) | Free (API) |
+| **Speed** | Fast | Very Fast |
+| **Privacy** | Code stays local | Code sent to cloud |
+| **Setup** | Complex | Simple |
+
+## Files for Groq Version
+
+```
+pr-agent-installer/
+├── install-groq.bat           # Groq installer
+└── workflow-groq/
+    └── pr_agent.yml           # Groq workflow
+```
+

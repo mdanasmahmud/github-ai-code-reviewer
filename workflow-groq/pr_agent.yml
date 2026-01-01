@@ -1,0 +1,57 @@
+name: PR Agent Review (Groq Cloud)
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  pr_agent_job:
+    if: ${{ github.event.sender.type != 'Bot' }}
+    runs-on: [self-hosted, windows]
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    name: Run PR Agent (Groq)
+    
+    steps:
+      - name: Run PR-Agent with Groq
+        shell: powershell
+        env:
+          GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GROQ__KEY: ${{ secrets.GROQ_API_KEY }}
+          CONFIG__MODEL: "groq/llama-3.3-70b-versatile"
+          CONFIG__FALLBACK_MODELS: "groq/llama-3.1-8b-instant"
+          CONFIG__GIT_PROVIDER: "github"
+        run: |
+          $prUrl = "${{ github.event.pull_request.html_url }}"
+          if ($prUrl) {
+            Write-Host "Running PR-Agent (Groq) on: $prUrl"
+            Write-Host ""
+            
+            Write-Host "=== Running: Review ==="
+            python -m pr_agent.cli --pr_url "$prUrl" review
+            
+            Write-Host ""
+            Write-Host "=== Running: Describe ==="
+            python -m pr_agent.cli --pr_url "$prUrl" describe
+            
+            Write-Host ""
+            Write-Host "=== Running: Improve ==="
+            python -m pr_agent.cli --pr_url "$prUrl" improve
+            
+            Write-Host ""
+            Write-Host "=== Running: Add Docs ==="
+            python -m pr_agent.cli --pr_url "$prUrl" add_docs
+            
+            Write-Host ""
+            Write-Host "=== Running: Generate Labels ==="
+            python -m pr_agent.cli --pr_url "$prUrl" generate_labels
+            
+            Write-Host ""
+            Write-Host "=== PR-Agent Complete ==="
+          } else {
+            Write-Host "No PR URL found, skipping..."
+          }
