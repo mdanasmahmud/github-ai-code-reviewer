@@ -1,0 +1,56 @@
+name: PR Agent Review
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  pr_agent_job:
+    if: ${{ github.event.sender.type != 'Bot' }}
+    runs-on: [self-hosted, windows, ollama]
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    name: Run PR Agent
+    
+    steps:
+      - name: Ensure Ollama is running
+        shell: powershell
+        run: |
+          $process = Get-Process -Name "ollama" -ErrorAction SilentlyContinue
+          if (-not $process) {
+            Write-Host "Starting Ollama..."
+            Start-Process -FilePath "ollama" -ArgumentList "serve" -WindowStyle Hidden
+            Start-Sleep -Seconds 10
+          }
+          try {
+            $response = Invoke-RestMethod -Uri "http://localhost:11434/api/tags" -Method Get
+            Write-Host "Ollama is running"
+          } catch {
+            Write-Error "Ollama is not accessible!"
+            exit 1
+          }
+
+      - name: Run PR-Agent Review
+        shell: powershell
+        env:
+          GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG__MODEL: "ollama/qwen2.5-coder:7b"
+          CONFIG__FALLBACK_MODELS: "ollama/qwen2.5-coder:7b"
+          CONFIG__CUSTOM_MODEL_MAX_TOKENS: "32000"
+          CONFIG__GIT_PROVIDER: "github"
+          OLLAMA__API_BASE: "http://localhost:11434"
+          CONFIG__DUPLICATE_EXAMPLES: "true"
+        run: |
+          $prUrl = "${{ github.event.pull_request.html_url }}"
+          if ($prUrl) {
+            Write-Host "Running PR-Agent on: $prUrl"
+            python -m pr_agent.cli --pr_url "$prUrl" review
+            python -m pr_agent.cli --pr_url "$prUrl" describe
+            python -m pr_agent.cli --pr_url "$prUrl" improve
+          } else {
+            Write-Host "No PR URL found, skipping..."
+          }

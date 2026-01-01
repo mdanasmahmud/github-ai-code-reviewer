@@ -1,0 +1,16 @@
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Runtime data
+runner.zip
+_diag/
+_work/
+
+# Secrets (never commit these!)
+.secrets.toml
+*.secret
+*.key
